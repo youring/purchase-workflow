@@ -23,16 +23,6 @@ class PurchaseOrderLine(models.Model):
         key = ({'date_planned': line.date_planned},)
         return key
 
-    @api.multi
-    def _update_picking_from_group_key(self, key):
-        """The picking is updated with data from the grouping key.
-        This method is designed for extensibility, so that other modules
-        can store more data based on new keys."""
-        for line in self:
-            for key_element in key:
-                if 'date_planned' in key_element.keys():
-                    line.date_planned = key_element['date_planned']
-        return False
 
     @api.model
     def _first_picking_copy_vals(self, key, lines):
@@ -57,25 +47,41 @@ class PurchaseOrderLine(models.Model):
             l.order_id, l, picking=picking))
 
         # If a picking is provided, use it for the first group only
-        po_lines = self.env['purchase.order.line']
         if picking:
             first_picking = picking
             key, lines = date_groups.next()
+            po_lines = self.env['purchase.order.line']
             for line in list(lines):
                 po_lines += line
-            po_lines._update_picking_from_group_key(key)
+            picking._update_picking_from_group_key(key)
             moves += super(PurchaseOrderLine, po_lines)._create_stock_moves(
                 first_picking)
         else:
             first_picking = False
-        po_lines = self.env['purchase.order.line']
+
         for key, lines in date_groups:
             # If a picking is provided, clone it for each key for modularity
             if picking:
                 copy_vals = self._first_picking_copy_vals(key, lines)
                 picking = first_picking.copy(copy_vals)
+            po_lines = self.env['purchase.order.line']
             for line in list(lines):
                 po_lines += line
             moves += super(PurchaseOrderLine, po_lines)._create_stock_moves(
                 picking)
         return moves
+
+
+class StockPicking(models.Model):
+    _inherit = 'stock.picking'
+
+    @api.multi
+    def _update_picking_from_group_key(self, key):
+        """The picking is updated with data from the grouping key.
+        This method is designed for extensibility, so that other modules
+        can store more data based on new keys."""
+        for rec in self:
+            for key_element in key:
+                if 'date_planned' in key_element.keys():
+                    rec.date = key_element['date_planned']
+        return False
