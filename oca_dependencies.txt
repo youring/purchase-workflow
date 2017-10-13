@@ -1,0 +1,1 @@
+server-tools https://github.com/akretion/server-tools 11.0-mig-base_exception
