@@ -17,7 +17,7 @@
 
         <record id ="po_excep_no_email" model="exception.rule">
             <field name="name">No email on vendor</field>
-            <field name="description">No Email for Vondor</field>
+            <field name="description">No Email for Vendor</field>
             <field name="sequence">50</field>
             <field name="rule_group">purchase</field>
             <field name="model">purchase.order</field>
