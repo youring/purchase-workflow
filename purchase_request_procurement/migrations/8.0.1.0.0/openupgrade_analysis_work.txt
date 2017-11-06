@@ -1,0 +1,11 @@
+---Fields in module 'purchase_request_procurement'---
+purchase_request_procurement / product.product          / purchase_request (boolean)    : DEL 
+purchase_request_procurement / product.template         / purchase_request (boolean)    : NEW
+# Done: Mapped value from product.product to product.template
+
+---XML records in module 'purchase_request_procurement'---
+NEW ir.ui.view: purchase_request_procurement.procurement_form_view
+NEW ir.ui.view: purchase_request_procurement.product_template_form_view_inherit
+DEL ir.ui.view: purchase_request_procurement.procurement_normal_form_view
+DEL ir.ui.view: purchase_request_procurement.product_normal_form_view_inherit
+# NOTHING TO DO

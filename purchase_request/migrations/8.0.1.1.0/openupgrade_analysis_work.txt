@@ -1,0 +1,25 @@
+---Fields in module 'purchase_request'---
+purchase_request / purchase.request         / created_on (date)             : DEL 
+purchase_request / purchase.request         / message_last_post (datetime)  : NEW 
+# NOTHING TO DO
+
+purchase_request / purchase.request         / picking_type_id (many2one)    : NEW relation: stock.picking.type, required: required, req_default: function
+purchase_request / purchase.request         / warehouse_id (many2one)       : DEL relation: stock.warehouse
+# DONE: Filled picking_type_id column with picking_types of same warehouse_id and code incoming
+
+purchase_request / purchase.request.line    / message_last_post (datetime)  : NEW
+purchase_request / purchase.request.line    / procurement_id (many2one)     : NEW relation: procurement.order
+purchase_request / purchase.request.line    / request_state (selection)     : selection_keys is now 'function' ('['approved', 'draft', 'rejected', 'to_approve']')
+purchase_request / purchase.request.line    / sequence (integer)            : DEL
+# NOTHING TO DO
+
+---XML records in module 'purchase_request'---
+NEW ir.actions.report.xml: purchase_request.action_report_purchase_requests
+NEW ir.rule: purchase_request.purchase_request_line_manager_rule
+NEW ir.rule: purchase_request.purchase_request_line_rule
+NEW ir.rule: purchase_request.purchase_request_manager_rule
+NEW ir.rule: purchase_request.purchase_request_rule
+DEL ir.rule: purchase_request.purchase_request_line_modify_rule
+DEL ir.rule: purchase_request.purchase_request_modify_rule
+NEW ir.ui.view: purchase_request.report_purchaserequests
+# NOTHING TO DO
