@@ -15,5 +15,7 @@ class PurchaseExceptionConfirm(models.TransientModel):
     def action_confirm(self):
         self.ensure_one()
         if self.ignore:
+            self.related_model_id.button_draft()
             self.related_model_id.ignore_exception = True
+            self.related_model_id.button_confirm()
         return super(PurchaseExceptionConfirm, self).action_confirm()

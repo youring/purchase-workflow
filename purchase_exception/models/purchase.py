@@ -47,7 +47,7 @@ class PurchaseOrder(models.Model):
 
     @api.multi
     def button_confirm(self):
-        if self.detect_exceptions():
+        if self.detect_exceptions() and not self.ignore_exception:
             return self._popup_exceptions()
         else:
             return super(PurchaseOrder, self).button_confirm()
@@ -55,10 +55,10 @@ class PurchaseOrder(models.Model):
     @api.multi
     def button_draft(self):
         res = super(PurchaseOrder, self).button_draft()
-        orders = self.filtered(lambda s: s.ignore_exception)
-        orders.write({
-            'ignore_exception': False,
-        })
+        for rec in self:
+            rec.exception_ids = False
+            rec.main_exception_id = False
+            rec.ignore_exception = False
         return res
 
     def _purchase_get_lines(self):
