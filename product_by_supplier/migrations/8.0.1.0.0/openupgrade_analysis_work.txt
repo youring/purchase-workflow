@@ -1,0 +1,13 @@
+# nothing to do
+
+---Fields in module 'product_by_supplier'---
+---XML records in module 'product_by_supplier'---
+DEL ir.actions.act_window.view: product_by_supplier.action_product_supplierinfo_form
+DEL ir.actions.act_window.view: product_by_supplier.action_product_supplierinfo_tree
+NEW ir.ui.view: product_by_supplier.product_template_form_view
+NEW ir.ui.view: product_by_supplier.view_product_supplierinfo_form1
+NEW ir.ui.view: product_by_supplier.view_product_supplierinfo_tree1
+DEL ir.ui.view: product_by_supplier.product_product_tree_view_inherit
+DEL ir.ui.view: product_by_supplier.product_search_form_view
+DEL ir.ui.view: product_by_supplier.view_product_supplierinfo_form
+DEL ir.ui.view: product_by_supplier.view_product_supplierinfo_tree
