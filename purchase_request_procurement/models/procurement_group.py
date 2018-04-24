@@ -15,9 +15,9 @@ class ProcurementGroup(models.Model):
         copy=False,
     )
 
-    @api.multi
+    @api.model
     def _prepare_purchase_request_line(self):
-        self.ensure_one()
+        
         product = self.product_id
         procurement_uom_po_qty = self.product_uom._compute_quantity(
             self.product_qty, product.uom_po_id)
@@ -31,17 +31,15 @@ class ProcurementGroup(models.Model):
             'rule_id': self._get_rule()
         }
 
-    @api.multi
+    @api.model
     def _prepare_purchase_request(self):
-        self.ensure_one()
-
         return {
             'origin': self.origin,
             'company_id': self.company_id.id,
             'picking_type_id': self.rule_id.picking_type_id.id,
         }
 
-    @api.multi
+    @api.model
     def _search_existing_purchase_request(self):
         """
         This method is to be implemented by other modules that can
@@ -51,31 +49,22 @@ class ProcurementGroup(models.Model):
         """
         return False
 
-    @api.multi
-    def run(self):
-        self.ensure_one()
-        if self.is_create_purchase_request_allowed():
+    @api.model
+    def run(self, product_id, product_qty, product_uom, location_id, name,
+            origin, values):
+        res = super(ProcurementGroup, self).run(product_id, product_qty, product_uom, location_id, name,
+            origin, values)
+        if res:
             self.create_purchase_request()
             return True
-        return super(ProcurementGroup, self).run()
+        return False
 
-    @api.multi
-    def is_create_purchase_request_allowed(self):
-        """
-        Tell if current procurement order should
-        create a purchase request or not.
-        :return: boolean
-        """
-        self.ensure_one()
-        return self.rule_id and self.rule_id.action == 'buy' \
-            and self.product_id.purchase_request
-
-    @api.multi
+    @api.model
     def create_purchase_request(self):
         """
         Create a purchase request containing procurement order product.
         """
-        self.ensure_one()
+        
         if not self.is_create_purchase_request_allowed():
             raise exceptions.Warning(
                 _("You can't create a purchase request "

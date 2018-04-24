@@ -12,11 +12,12 @@ class PurchaseRequest(models.Model):
 
     @api.multi
     def _check_rejected_allowed(self):
-        if any([s == 'done' for s in self.mapped(
-                'line_ids.procurement_id.state')]):
-            raise UserError(
-                _('You cannot reject a purchase request with lines related to '
-                  'done procurement orders.'))
+        # if any([s == 'done' for s in self.mapped(
+        #         'line_ids.procurement_id.state')]):
+        #     raise UserError(
+        #         _('You cannot reject a purchase request with lines related to '
+        #           'done procurement orders.'))
+        return
 
     @api.multi
     def button_rejected(self):
@@ -25,11 +26,12 @@ class PurchaseRequest(models.Model):
 
     @api.multi
     def _check_reset_allowed(self):
-        if any([s == 'done' for s in self.mapped(
-                'line_ids.procurement_id.state')]):
-            raise UserError(
-                _('You cannot set back to draft a purchase request with lines '
-                  'related to done procurement orders.'))
+        # if any([s == 'done' for s in self.mapped(
+        #         'line_ids.procurement_id.state')]):
+        #     raise UserError(
+        #         _('You cannot set back to draft a purchase request with lines '
+        #           'related to done procurement orders.'))
+        pass
 
     @api.multi
     def button_draft(self):
