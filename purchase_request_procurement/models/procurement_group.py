@@ -28,7 +28,7 @@ class ProcurementGroup(models.Model):
             'product_uom_id': product.uom_po_id.id,
             'product_qty': procurement_uom_po_qty,
             'request_id': self.request_id.id,
-            'rule_id': self._get_rule(product.id, location_)
+            'rule_id': self._get_rule()
         }
 
     @api.multi

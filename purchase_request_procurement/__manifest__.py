@@ -11,11 +11,9 @@
     'category': "Purchase Management",
     'depends': [
         "purchase_request",
-        "procurement",
     ],
     'data': [
         "views/product_template.xml",
-        "views/procurement_order.xml",
     ],
     'demo': [],
     'license': 'LGPL-3',
