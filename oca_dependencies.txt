@@ -1,2 +1,2 @@
 server-tools
-purchase-workflow
+purchase-workflow https://github.com/Eficent/purchase-workflow 11.0-mig-purchase_request
