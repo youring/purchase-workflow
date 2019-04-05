@@ -18,4 +18,4 @@ def force_fields_to_recompute(cr):
 
 @openupgrade.migrate(use_env=True)
 def migrate(env, version):
-    force_fields_to_recompute(envcr)
+    force_fields_to_recompute(env.cr)
