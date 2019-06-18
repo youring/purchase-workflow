@@ -23,6 +23,8 @@
         "views/purchase_request_view.xml",
         "reports/report_purchaserequests.xml",
         "views/purchase_request_report.xml",
+        "views/purchase_request_allocation_views.xml",
+        "views/stock_move_views.xml",
     ],
     'demo': [
         "demo/purchase_request_demo.xml",
