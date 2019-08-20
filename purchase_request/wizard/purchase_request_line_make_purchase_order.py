@@ -85,16 +85,16 @@ class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
         assert active_model == 'purchase.request.line', \
             'Bad context propagation'
         items = []
-        groups = []
+        # groups = []
         self._check_valid_request_line(request_line_ids)
         request_lines = request_line_obj.browse(request_line_ids)
         for line in request_lines:
             items.append([0, 0, self._prepare_item(line)])
-            groups.append(line.request_id.group_id.id)
-        if len(list(set(groups))) > 1:
-            raise UserError(
-                _('You cannot create a single purchase order from '
-                  'purchase requests that have different procurement group.'))
+        #     groups.append(line.request_id.group_id.id)
+        # if len(list(set(groups))) > 1:
+        #     raise UserError(
+        #         _('You cannot create a single purchase order from '
+        #           'purchase requests that have different procurement group.'))
         res['item_ids'] = items
         supplier_ids = request_lines.mapped('supplier_id').ids
         if len(supplier_ids) == 1:
