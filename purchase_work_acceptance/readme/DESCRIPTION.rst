@@ -1,1 +1,3 @@
-This module work about quantity control on Receipt and Vendor Bill by Work Acceptance.
+This module introuces the abilitiy to define a quantity control point on Receipts and Vendor Bills by
+Work Acceptance. Only the products and services that have been included in a Work Acceptance can be
+received and/or invoiced.
