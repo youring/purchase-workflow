@@ -1,13 +1,10 @@
 # Copyright 2018-2019 Eficent Business and IT Consulting Services S.L.
-# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0).
-
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0)
 
 from datetime import datetime
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
-
-import odoo.addons.decimal_precision as dp
 
 
 class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
@@ -15,16 +12,21 @@ class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
     _description = "Purchase Request Line Make Purchase Order"
 
     supplier_id = fields.Many2one(
-        "res.partner",
+        comodel_name="res.partner",
         string="Supplier",
         required=True,
-        domain=[("supplier", "=", True), ("is_company", "=", True)],
+        domain=[("is_company", "=", True)],
+        context={"res_partner_search_mode": "supplier", "default_is_company": True},
     )
     item_ids = fields.One2many(
-        "purchase.request.line.make.purchase.order.item", "wiz_id", string="Items"
+        comodel_name="purchase.request.line.make.purchase.order.item",
+        inverse_name="wiz_id",
+        string="Items",
     )
     purchase_order_id = fields.Many2one(
-        "purchase.order", string="Purchase Order", domain=[("state", "=", "draft")]
+        comodel_name="purchase.order",
+        string="Purchase Order",
+        domain=[("state", "=", "draft")],
     )
     sync_data_planned = fields.Boolean(
         string="Merge on PO lines with equal Scheduled Date"
@@ -48,13 +50,13 @@ class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
 
         for line in self.env["purchase.request.line"].browse(request_line_ids):
 
+            if line.request_id.state == "done":
+                raise UserError(_("The purchase has already been completed."))
+
             if line.request_id.state != "approved":
                 raise UserError(
                     _("Purchase Request %s is not approved") % line.request_id.name
                 )
-
-            if line.purchase_state == "done":
-                raise UserError(_("The purchase has already been completed."))
 
             line_company_id = line.company_id and line.company_id.id or False
             if company_id is not False and line_company_id != company_id:
@@ -95,20 +97,15 @@ class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
 
     @api.model
     def default_get(self, fields):
-        res = super().default_get(fields)
+        res = super(PurchaseRequestLineMakePurchaseOrder, self).default_get(fields)
+        request_line_obj = self.env["purchase.request.line"]
+        request_line_ids = self.env.context.get("active_ids", False)
         active_model = self.env.context.get("active_model", False)
-        request_line_ids = []
-        if active_model == "purchase.request.line":
-            request_line_ids += self.env.context.get("active_ids", [])
-        elif active_model == "purchase.request":
-            request_ids = self.env.context.get("active_ids", False)
-            request_line_ids += (
-                self.env[active_model].browse(request_ids).mapped("line_ids.id")
-            )
         if not request_line_ids:
             return res
+        assert active_model == "purchase.request.line", "Bad context propagation"
         res["item_ids"] = self.get_items(request_line_ids)
-        request_lines = self.env["purchase.request.line"].browse(request_line_ids)
+        request_lines = request_line_obj.browse(request_line_ids)
         supplier_ids = request_lines.mapped("supplier_id").ids
         if len(supplier_ids) == 1:
             res["supplier_id"] = supplier_ids[0]
@@ -316,31 +313,34 @@ class PurchaseRequestLineMakePurchaseOrderItem(models.TransientModel):
     _description = "Purchase Request Line Make Purchase Order Item"
 
     wiz_id = fields.Many2one(
-        "purchase.request.line.make.purchase.order",
+        comodel_name="purchase.request.line.make.purchase.order",
         string="Wizard",
         required=True,
         ondelete="cascade",
         readonly=True,
     )
-    line_id = fields.Many2one("purchase.request.line", string="Purchase Request Line")
+    line_id = fields.Many2one(
+        comodel_name="purchase.request.line", string="Purchase Request Line"
+    )
     request_id = fields.Many2one(
-        "purchase.request",
+        comodel_name="purchase.request",
         related="line_id.request_id",
         string="Purchase Request",
         readonly=False,
     )
     product_id = fields.Many2one(
-        "product.product",
+        comodel_name="product.product",
         string="Product",
         related="line_id.product_id",
         readonly=False,
     )
     name = fields.Char(string="Description", required=True)
     product_qty = fields.Float(
-        string="Quantity to purchase",
-        digits=dp.get_precision("Product Unit of Measure"),
+        string="Quantity to purchase", digits="Product Unit of Measure"
     )
-    product_uom_id = fields.Many2one("uom.uom", string="UoM", required=True)
+    product_uom_id = fields.Many2one(
+        comodel_name="uom.uom", string="UoM", required=True
+    )
     keep_description = fields.Boolean(
         string="Copy descriptions to new PO",
         help="Set true if you want to keep the "

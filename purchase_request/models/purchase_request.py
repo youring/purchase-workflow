@@ -1,5 +1,5 @@
 # Copyright 2018-2019 Eficent Business and IT Consulting Services S.L.
-# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0).
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0)
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
@@ -22,8 +22,7 @@ class PurchaseRequest(models.Model):
 
     @api.model
     def _company_get(self):
-        company_id = self.env["res.company"]._company_default_get(self._name)
-        return self.env["res.company"].browse(company_id.id)
+        return self.env["res.company"].browse(self.env.company.id)
 
     @api.model
     def _get_default_requested_by(self):
@@ -36,7 +35,7 @@ class PurchaseRequest(models.Model):
     @api.model
     def _default_picking_type(self):
         type_obj = self.env["stock.picking.type"]
-        company_id = self.env.context.get("company_id") or self.env.user.company_id.id
+        company_id = self.env.context.get("company_id") or self.env.company.id
         types = type_obj.search(
             [("code", "=", "incoming"), ("warehouse_id.company_id", "=", company_id)]
         )
@@ -55,28 +54,28 @@ class PurchaseRequest(models.Model):
                 rec.is_editable = True
 
     name = fields.Char(
-        "Request Reference",
+        string="Request Reference",
         required=True,
         default=_get_default_name,
         track_visibility="onchange",
     )
-    origin = fields.Char("Source Document")
+    origin = fields.Char(string="Source Document")
     date_start = fields.Date(
-        "Creation date",
+        string="Creation date",
         help="Date when the user initiated the " "request.",
         default=fields.Date.context_today,
         track_visibility="onchange",
     )
     requested_by = fields.Many2one(
-        "res.users",
-        "Requested by",
+        comodel_name="res.users",
+        string="Requested by",
         required=True,
         track_visibility="onchange",
         default=_get_default_requested_by,
     )
     assigned_to = fields.Many2one(
-        "res.users",
-        "Approver",
+        comodel_name="res.users",
+        string="Approver",
         track_visibility="onchange",
         domain=lambda self: [
             (
@@ -86,24 +85,24 @@ class PurchaseRequest(models.Model):
             )
         ],
     )
-    description = fields.Text("Description")
+    description = fields.Text(string="Description")
     company_id = fields.Many2one(
-        "res.company",
-        "Company",
+        comodel_name="res.company",
+        string="Company",
         required=True,
         default=_company_get,
         track_visibility="onchange",
     )
     line_ids = fields.One2many(
-        "purchase.request.line",
-        "request_id",
-        "Products to Purchase",
+        comodel_name="purchase.request.line",
+        inverse_name="request_id",
+        string="Products to Purchase",
         readonly=False,
         copy=True,
         track_visibility="onchange",
     )
     product_id = fields.Many2one(
-        "product.product",
+        comodel_name="product.product",
         related="line_ids.product_id",
         string="Product",
         readonly=True,
@@ -122,13 +121,13 @@ class PurchaseRequest(models.Model):
     )
     to_approve_allowed = fields.Boolean(compute="_compute_to_approve_allowed")
     picking_type_id = fields.Many2one(
-        "stock.picking.type",
-        "Picking Type",
+        comodel_name="stock.picking.type",
+        string="Picking Type",
         required=True,
         default=_default_picking_type,
     )
     group_id = fields.Many2one(
-        "procurement.group", string="Procurement Group", copy=False
+        comodel_name="procurement.group", string="Procurement Group", copy=False
     )
     line_count = fields.Integer(
         string="Purchase Request Line count",
