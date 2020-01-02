@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright 2018-2019 Eficent Business and IT Consulting Services S.L.
+<!-- Copyright 2018-2019 ForgeFlow S.L.
      License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0) -->
 <odoo>
 
@@ -55,8 +55,7 @@
         <field name="name">Create RFQ</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">purchase.request.line.make.purchase.order</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">form</field>
+<field name="view_mode">form</field>
         <field name="view_id" ref="view_purchase_request_line_make_purchase_order"/>
         <field name="target">new</field>
         <field name="binding_model_id" ref="purchase_request.model_purchase_request_line" />

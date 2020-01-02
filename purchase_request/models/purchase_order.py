@@ -1,5 +1,5 @@
-# Copyright 2018-2019 Eficent Business and IT Consulting Services S.L.
-# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0).
+# Copyright 2018-2019 ForgeFlow S.L.
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0)
 
 from odoo import _, api, exceptions, fields, models
 
@@ -7,8 +7,7 @@ from odoo import _, api, exceptions, fields, models
 class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
 
-    @api.multi
-    def _purchase_request_confirm_message_content(self, request, request_dict):
+    def _purchase_request_confirm_message_content(self, request, request_dict=None):
         self.ensure_one()
         if not request_dict:
             request_dict = {}
@@ -34,7 +33,6 @@ class PurchaseOrder(models.Model):
         message += "</ul>"
         return message
 
-    @api.multi
     def _purchase_request_confirm_message(self):
         request_obj = self.env["purchase.request"]
         for po in self:
@@ -60,7 +58,6 @@ class PurchaseOrder(models.Model):
                 request.message_post(body=message, subtype="mail.mt_comment")
         return True
 
-    @api.multi
     def _purchase_request_line_check(self):
         for po in self:
             for line in po.order_line:
@@ -72,14 +69,12 @@ class PurchaseOrder(models.Model):
                         )
         return True
 
-    @api.multi
     def button_confirm(self):
         self._purchase_request_line_check()
         res = super(PurchaseOrder, self).button_confirm()
         self._purchase_request_confirm_message()
         return res
 
-    @api.multi
     def unlink(self):
         alloc_to_unlink = self.env["purchase.request.allocation"]
         for rec in self:
@@ -98,11 +93,11 @@ class PurchaseOrderLine(models.Model):
     _inherit = "purchase.order.line"
 
     purchase_request_lines = fields.Many2many(
-        "purchase.request.line",
-        "purchase_request_purchase_order_line_rel",
-        "purchase_order_line_id",
-        "purchase_request_line_id",
-        "Purchase Request Lines",
+        comodel_name="purchase.request.line",
+        relation="purchase_request_purchase_order_line_rel",
+        column1="purchase_order_line_id",
+        column2="purchase_request_line_id",
+        string="Purchase Request Lines",
         readonly=True,
         copy=False,
     )
@@ -114,7 +109,6 @@ class PurchaseOrderLine(models.Model):
         copy=False,
     )
 
-    @api.multi
     def action_openRequestLineTreeView(self):
         """
         :return dict: dictionary value for created view
@@ -129,12 +123,10 @@ class PurchaseOrderLine(models.Model):
             "name": _("Purchase Request Lines"),
             "type": "ir.actions.act_window",
             "res_model": "purchase.request.line",
-            "view_type": "form",
             "view_mode": "tree,form",
             "domain": domain,
         }
 
-    @api.multi
     def _prepare_stock_moves(self, picking):
         self.ensure_one()
         val = super(PurchaseOrderLine, self)._prepare_stock_moves(picking)
@@ -148,7 +140,6 @@ class PurchaseOrderLine(models.Model):
             v["purchase_request_allocation_ids"] = all_list
         return val
 
-    @api.multi
     def update_service_allocations(self, prev_qty_received):
         for rec in self:
             allocation = self.env["purchase.request.allocation"].search(
@@ -217,7 +208,6 @@ class PurchaseOrderLine(models.Model):
             "requestor": request_line.request_id.requested_by.partner_id.name,
         }
 
-    @api.multi
     def write(self, vals):
         #  As services do not generate stock move this tweak is required
         #  to allocate them.
