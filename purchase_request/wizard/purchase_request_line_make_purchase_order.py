@@ -1,5 +1,5 @@
 # Copyright 2018-2019 Eficent Business and IT Consulting Services S.L.
-# License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0).
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 
 
 from datetime import datetime
@@ -7,18 +7,17 @@ from datetime import datetime
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
-import odoo.addons.decimal_precision as dp
-
 
 class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
     _name = "purchase.request.line.make.purchase.order"
     _description = "Purchase Request Line Make Purchase Order"
 
     supplier_id = fields.Many2one(
-        "res.partner",
+        comodel_name="res.partner",
         string="Supplier",
         required=True,
-        domain=[("supplier", "=", True), ("is_company", "=", True)],
+        domain=[("is_company", "=", True)],
+        context={"res_partner_search_mode": "supplier", "default_is_company": True},
     )
     item_ids = fields.One2many(
         "purchase.request.line.make.purchase.order.item", "wiz_id", string="Items"
@@ -47,7 +46,8 @@ class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
         company_id = False
 
         for line in self.env["purchase.request.line"].browse(request_line_ids):
-
+            if line.request_id.state == "done":
+                raise UserError(_("The purchase has already been completed."))
             if line.request_id.state != "approved":
                 raise UserError(
                     _("Purchase Request %s is not approved") % line.request_id.name
@@ -225,7 +225,6 @@ class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
             order_line_data.append(("name", "=", item.name))
         return order_line_data
 
-    @api.multi
     def make_purchase_order(self):
         res = []
         purchase_obj = self.env["purchase.order"]
@@ -303,7 +302,6 @@ class PurchaseRequestLineMakePurchaseOrder(models.TransientModel):
         return {
             "domain": [("id", "in", res)],
             "name": _("RFQ"),
-            "view_type": "form",
             "view_mode": "tree,form",
             "res_model": "purchase.order",
             "view_id": False,
@@ -338,8 +336,7 @@ class PurchaseRequestLineMakePurchaseOrderItem(models.TransientModel):
     )
     name = fields.Char(string="Description", required=True)
     product_qty = fields.Float(
-        string="Quantity to purchase",
-        digits=dp.get_precision("Product Unit of Measure"),
+        string="Quantity to purchase", digits="Product Unit of Measure"
     )
     product_uom_id = fields.Many2one("uom.uom", string="UoM", required=True)
     keep_description = fields.Boolean(
